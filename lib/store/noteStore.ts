@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 
 import type { NewNote } from '@/types/note';
 
@@ -14,10 +15,18 @@ type NoteStore = {
   clearDraft: () => void;
 };
 
-export const useNoteStore = create<NoteStore>()(set => ({
-  draft: initialDraft,
+export const useNoteStore = create<NoteStore>()(
+  persist(
+    set => ({
+      draft: initialDraft,
 
-  setDraft: draft => set({ draft }),
+      setDraft: draft => set({ draft }),
 
-  clearDraft: () => set({ draft: initialDraft }),
-}));
+      clearDraft: () => set({ draft: initialDraft }),
+    }),
+    {
+      name: 'note-draft',
+      partialize: state => ({ draft: state.draft }),
+    }
+  )
+);
