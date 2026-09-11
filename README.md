@@ -10,7 +10,10 @@ TypeScript.
 - Tag navigation with parallel routes
 - Note preview modal with intercepted routes
 - Direct note details page
+- Dedicated page for creating notes
+- Draft state management and persistence with Zustand
 - Server-side data prefetching and hydration with TanStack Query
+- Dynamic SEO metadata and Open Graph
 - Loading, error, and not-found states
 
 ## Technologies
@@ -19,9 +22,8 @@ TypeScript.
 - React
 - TypeScript
 - TanStack Query
+- Zustand
 - Axios
-- Formik
-- Yup
 - CSS Modules
 
 ## Getting Started
