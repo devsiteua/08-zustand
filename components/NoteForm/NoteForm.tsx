@@ -4,6 +4,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 
 import { createNote } from '@/lib/api/notes';
+import { useNoteStore } from '@/lib/store/noteStore';
 import type { NewNote } from '@/types/note';
 
 import css from './NoteForm.module.css';
@@ -11,11 +12,13 @@ import css from './NoteForm.module.css';
 export default function NoteForm() {
   const router = useRouter();
   const queryClient = useQueryClient();
+  const { draft, setDraft, clearDraft } = useNoteStore();
 
   const createMutation = useMutation({
     mutationFn: createNote,
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ['notes'] });
+      clearDraft();
       router.back();
     },
   });
@@ -45,6 +48,13 @@ export default function NoteForm() {
           name="title"
           minLength={3}
           maxLength={50}
+          value={draft.title}
+          onChange={event =>
+            setDraft({
+              ...draft,
+              title: event.target.value,
+            })
+          }
           required
         />
       </div>
@@ -57,12 +67,30 @@ export default function NoteForm() {
           name="content"
           rows={8}
           maxLength={500}
+          value={draft.content}
+          onChange={event =>
+            setDraft({
+              ...draft,
+              content: event.target.value,
+            })
+          }
         />
       </div>
 
       <div className={css.formGroup}>
         <label htmlFor="tag">Tag</label>
-        <select id="tag" className={css.select} name="tag" defaultValue="Todo">
+        <select
+          id="tag"
+          className={css.select}
+          name="tag"
+          value={draft.tag}
+          onChange={event =>
+            setDraft({
+              ...draft,
+              tag: event.target.value as NewNote['tag'],
+            })
+          }
+        >
           <option value="Todo">Todo</option>
           <option value="Work">Work</option>
           <option value="Personal">Personal</option>
