@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import {
   keepPreviousData,
   useMutation,
@@ -9,9 +10,7 @@ import {
 } from '@tanstack/react-query';
 import { useDebouncedCallback } from 'use-debounce';
 
-import { createNote, deleteNote, fetchNotes } from '@/lib/api/notes';
-import Modal from '@/components/Modal/Modal';
-import NoteForm from '@/components/NoteForm/NoteForm';
+import { deleteNote, fetchNotes } from '@/lib/api/notes';
 import NoteList from '@/components/NoteList/NoteList';
 import Pagination from '@/components/Pagination/Pagination';
 import SearchBox from '@/components/SearchBox/SearchBox';
@@ -26,18 +25,9 @@ interface NotesClientProps {
 
 export default function NotesClient({ tag }: NotesClientProps) {
   const [currentPage, setCurrentPage] = useState(1);
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
   const queryClient = useQueryClient();
-
-  const createMutation = useMutation({
-    mutationFn: createNote,
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ['notes'] });
-      setIsModalOpen(false);
-    },
-  });
 
   const deleteMutation = useMutation({
     mutationFn: deleteNote,
@@ -45,16 +35,6 @@ export default function NotesClient({ tag }: NotesClientProps) {
       await queryClient.invalidateQueries({ queryKey: ['notes'] });
     },
   });
-
-  const handleOpenModal = () => {
-    createMutation.reset();
-    setIsModalOpen(true);
-  };
-
-  const handleCloseModal = () => {
-    createMutation.reset();
-    setIsModalOpen(false);
-  };
 
   const handleSearch = useDebouncedCallback((value: string) => {
     setSearchQuery(value);
@@ -86,9 +66,9 @@ export default function NotesClient({ tag }: NotesClientProps) {
           />
         )}
 
-        <button className={css.button} type="button" onClick={handleOpenModal}>
+        <Link className={css.button} href="/notes/action/create">
           Create note +
-        </button>
+        </Link>
       </header>
 
       {deleteMutation.isError && (
@@ -111,20 +91,6 @@ export default function NotesClient({ tag }: NotesClientProps) {
             deleteMutation.isPending ? deleteMutation.variables : undefined
           }
         />
-      )}
-
-      {isModalOpen && (
-        <Modal onClose={handleCloseModal}>
-          {createMutation.isError && (
-            <p>Failed to create note: {createMutation.error.message}</p>
-          )}
-
-          <NoteForm
-            onSubmit={note => createMutation.mutate(note)}
-            onCancel={handleCloseModal}
-            isSubmitting={createMutation.isPending}
-          />
-        </Modal>
       )}
     </div>
   );
